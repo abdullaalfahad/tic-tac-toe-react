@@ -28,8 +28,8 @@ function Board({ squares, isXNext, onPlay }) {
   };
 
   return (
-    <div className="m-10">
-      <h2 className="text-2xl mb-4">{status}</h2>
+    <>
+      <h2 className="text-lg mb-4">{status}</h2>
 
       <div className="flex">
         <Square value={squares[0]} handleClick={() => handleClick(0)} />
@@ -46,30 +46,54 @@ function Board({ squares, isXNext, onPlay }) {
         <Square value={squares[7]} handleClick={() => handleClick(7)} />
         <Square value={squares[8]} handleClick={() => handleClick(8)} />
       </div>
-    </div>
+    </>
   );
 }
 
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [isXNext, setIsXNext] = useState(true);
+  const [currentMove, setCurrentMove] = useState(0);
 
-  const currentHistory = history[history.length - 1];
+  const currentHistory = history[currentMove];
 
   const handlePlay = (squares) => {
     setIsXNext(!isXNext);
-
-    setHistory([...history, squares]);
+    const nextHistory = [...history.slice(0, currentMove + 1), squares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
   };
 
+  const jumpMove = (move) => {
+    setCurrentMove(move);
+
+    setIsXNext(move % 2 === 0);
+  };
+
+  const moves = history.map((squares, move) => {
+    let description;
+
+    if (move > 0) {
+      description = `Go to move #${move}`;
+    } else {
+      description = "Go to game start";
+    }
+
+    return (
+      <li className="mb-1 text-white bg-gray-500 p-1" key={move}>
+        <button onClick={() => jumpMove(move)}>{description}</button>
+      </li>
+    );
+  });
+
   return (
-    <div>
+    <div className="flex justify-center gap-10 mt-8">
       <div>
         <Board squares={currentHistory} isXNext={isXNext} onPlay={handlePlay} />
       </div>
 
       <div>
-        <ol></ol>
+        <ol className="text-lg border border-gray-400 p-1">{moves}</ol>
       </div>
     </div>
   );
